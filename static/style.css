@@ -1,67 +1,122 @@
 body {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: #343541;
+    color: white;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    font-family: 'Arial', sans-serif;
+}
+
+.sidebar {
+    width: 300px;
+    background: #202123;
+    padding: 20px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow-y: auto;
+    border-right: 1px solid #4a4b4d;
+}
+
+.sidebar button {
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.chat-container {
+    margin-left: 320px;
+    display: flex;
     flex-direction: column;
+    align-items: center;
+    width: 70%;
+}
+
+.upload-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
 }
 
 .chat {
-    width: 700px;
-    background: white;
+    width: 100%;
+    background: #444654;
     border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
 }
 
 .msg_head {
-    background: #764ba2;
+    background: #202123;
     color: white;
     padding: 15px;
     font-size: 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    font-weight: bold;
 }
 
 .msg_card_body {
     padding: 15px;
     height: 400px;
     overflow-y: auto;
-    background: #f1f1f1;
+    background: #343541;
+    border-bottom: 1px solid #4a4b4d;
 }
 
 .msg_cotainer,
 .msg_cotainer_send {
-    padding: 10px;
+    padding: 12px;
     border-radius: 10px;
     margin-bottom: 10px;
     max-width: 75%;
+    font-size: 15px;
+    line-height: 1.4;
 }
 
 .msg_cotainer {
-    background: #e3f2fd;
+    background: #555770;
     align-self: flex-start;
+    color: white;
 }
 
 .msg_cotainer_send {
-    background: #dcedc8;
+    background: #0d6efd;
     align-self: flex-end;
+    color: white;
 }
 
-.input-group-text {
-    background: #764ba2;
-    color: white;
-    border: none;
+.card-footer {
+    background: #202123;
+    padding: 15px;
+    border-top: 1px solid #4a4b4d;
 }
 
 .type_msg {
     border-radius: 20px;
-    border: 1px solid #764ba2;
-    padding: 10px;
+    border: 1px solid #4a4b4d;
+    padding: 12px;
+    background: #343541;
+    color: white;
+    outline: none;
 }
 
-.upload-section {
-    margin-bottom: 20px;
+.type_msg:focus {
+    border-color: #0d6efd;
+}
+
+.input-group-text {
+    background: #0d6efd;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+.input-group-append button {
+    border-radius: 50px;
+    padding: 10px 15px;
 }
