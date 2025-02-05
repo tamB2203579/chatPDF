@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatBot</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <style>
+body {
+    background: #343541;
+    color: white;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Arial', sans-serif;
+}
+
+.sidebar {
+    width: 300px;
+    background: #202123;
+    padding: 20px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow-y: auto;
+    border-right: 1px solid #4a4b4d;
+}
+
+.sidebar button {
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.chat-container {
+    margin-left: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 70%;
+}
+
+.upload-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.chat {
+    width: 100%;
+    background: #444654;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+}
+
+.msg_head {
+    background: #202123;
+    color: white;
+    padding: 15px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: bold;
+}
+
+.msg_card_body {
+    padding: 15px;
+    height: 400px;
+    overflow-y: auto;
+    background: #343541;
+    border-bottom: 1px solid #4a4b4d;
+}
+
+.msg_cotainer,
+.msg_cotainer_send {
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    max-width: 75%;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.msg_cotainer {
+    background: #555770;
+    align-self: flex-start;
+    color: white;
+}
+
+.msg_cotainer_send {
+    background: #0d6efd;
+    align-self: flex-end;
+    color: white;
+}
+
+.card-footer {
+    background: #202123;
+    padding: 15px;
+    border-top: 1px solid #4a4b4d;
+}
+
+.type_msg {
+    border-radius: 20px;
+    border: 1px solid #4a4b4d;
+    padding: 12px;
+    background: #343541;
+    color: white;
+    outline: none;
+}
+
+.type_msg:focus {
+    border-color: #0d6efd;
+}
+
+.input-group-text {
+    background: #0d6efd;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+.input-group-append button {
+    border-radius: 50px;
+    padding: 10px 15px;
+}
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <button id="newChat" class="btn btn-success btn-block mb-3">New Chat</button>
+        <button id="clearAllChats" class="btn btn-danger btn-block mb-3">Clear All Chats</button>
+        <ul id="chatHistory" class="list-group">
+        </ul>
+    </div>
+
+    <div class="chat-container">
+        <div class="upload-section">
+            <input type="file" id="pdfUpload" accept="application/pdf">
+            <button id="uploadBtn" class="btn btn-primary">Upload PDF</button>
+        </div>
+        <div class="chat">
+            <div class="msg_head">
+                <span>ChatPDF</span>
+            </div>
+            <div id="messageFormeight" class="msg_card_body"></div>
+            <div class="card-footer p-3">
+                <form id="messageArea" class="input-group">
+                    <input type="text" id="text" name="msg" placeholder="Ask ChatPDF anything..."
+                        class="form-control type_msg" required>
+                    <div class="input-group-append mx-2">
+                        <button type="submit" id="send" class="input-group-text">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                        <button id="clearChat" class="btn btn-danger ml-2">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            let chatCount = 0;
+            let chats = {};
+            let selectedChatId = null;
+
+            function saveChatHistory() {
+                let chatContent = $("#messageFormeight").html().trim();
+
+                if (chatContent === "" || (selectedChatId && chats[selectedChatId] === chatContent)) {
+                    return; // Prevent duplicate or empty chat history entries
+                }
+
+                let chatId = "chat_" + chatCount;
+                chats[chatId] = chatContent;
+                $("#chatHistory").append(`<li class='list-group-item chat-item' data-id='${chatId}'>Chat ${chatCount + 1}</li>`);
+
+                selectedChatId = chatId;
+                chatCount++;
+            }
+
+            function loadChat(chatId) {
+                if (chats[chatId]) {
+                    $("#messageFormeight").html(chats[chatId]);
+                    selectedChatId = chatId;
+                }
+            }
+
+            $("#newChat").click(function () {
+                saveChatHistory();
+
+                $("#messageFormeight").html("");
+                $("#text").val("");
+                selectedChatId = null;
+            });
+
+            $("#clearAllChats").click(function () {
+                chatCount = 0;
+                chats = {};
+                $("#chatHistory").html("");
+                $("#messageFormeight").html("");
+                selectedChatId = null;
+            });
+
+            $(document).on("click", ".chat-item", function () {
+                let chatId = $(this).data("id");
+                loadChat(chatId);
+            });
+
+            $("#uploadBtn").click(function () {
+                var file = $("#pdfUpload")[0].files[0];
+                if (file) {
+                    var formData = new FormData();
+                    formData.append("file", file);
+                    $.ajax({
+                        url: "/upload",
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (response) {
+                            alert("PDF uploaded successfully!");
+                        }
+                    });
+                }
+            });
+
+            $("#messageArea").on("submit", function (event) {
+                event.preventDefault();
+                var rawText = $("#text").val().trim();
+
+                if (rawText === "") return;
+
+                var userHtml = `<div class="d-flex justify-content-end"><div class="msg_cotainer_send">${rawText}</div></div>`;
+                $("#text").val("");
+                $("#messageFormeight").append(userHtml);
+
+                $.ajax({
+                    data: { msg: rawText },
+                    type: "POST",
+                    url: "/get",
+                }).done(function (data) {
+                    var botHtml = `<div class="d-flex justify-content-start"><div class="msg_cotainer">${data}</div></div>`;
+                    $("#messageFormeight").append(botHtml);
+                });
+            });
+
+            $("#clearChat").click(function () {
+                $("#messageFormeight").html("");
+                $("#text").val("");
+            });
+        });
+    </script>
+</body>
+
+</html>
