@@ -184,7 +184,7 @@ body {
 
                 let chatId = "chat_" + chatCount;
                 chats[chatId] = chatContent;
-                $("#chatHistory").append(`<li class='list-group-item chat-item' data-id='${chatId}'>Chat ${chatCount + 1}</li>`);
+                $("#chatHistory").append(`<li style="background: #202123; color: white; border-color: white; border-radius: 10px" class='list-group-item chat-item' data-id='${chatId}'>Chat ${chatCount + 1}</li>`);
 
                 selectedChatId = chatId;
                 chatCount++;

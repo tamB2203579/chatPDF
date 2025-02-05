@@ -27,8 +27,7 @@ def index():
 @app.route("/get", methods=["GET", "POST"])
 def chat():
     msg = request.form.get("msg")
-    input = msg
-    return get_Chat_response(input)
+    return get_Chat_response(msg)
 
 @app.route("/upload", methods=["POST"])
 def upload_pdf():
@@ -66,7 +65,7 @@ def chunking(content, embeddings):
     return text_splitter.create_documents([content])
 
 rag_template = """\
-Use the following context to answer the user's query in a well-formatted, concise, and clear manner paragraph. If you don't have an answer in pdf file, respond "I don't know"
+Use the following context to answer the user's query in a well-formatted, concise, and clear manner paragraph. If you don't have an answer, respond "Tài liệu pdf mà bạn cung cấp không có thông tin cho câu hỏi của bạn!"
 
 Câu hỏi:
 {question}
