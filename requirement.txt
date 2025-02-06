@@ -1,5 +1,6 @@
 ﻿flask
 pymupdf
+faiss-cpu
 langchain_community
 langchain_openai
 langchain_core
