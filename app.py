@@ -59,12 +59,13 @@ def chunking(content, embeddings):
     text_splitter = SemanticChunker(
         embeddings,
         breakpoint_threshold_type="percentile",
-        breakpoint_threshold_amount=90
+        breakpoint_threshold_amount=90,
+        min_chunk_size=100
     )
     return text_splitter.create_documents([content])
 
 rag_template = """\
-Use the following context to answer the user's query in a well-formatted, concise, and clear manner paragraph. If you don't have an answer, respond "Tài liệu pdf mà bạn cung cấp không có thông tin cho câu hỏi của bạn!"
+Use only the following context to answer the user's query in a well-formatted, concise, and clear manner paragraph. If you don't have an answer, respond "Tài liệu pdf mà bạn cung cấp không có thông tin cho câu hỏi của bạn!".
 
 Câu hỏi:
 {question}
@@ -76,9 +77,12 @@ Trả lời:
 rag_prompt = ChatPromptTemplate.from_template(rag_template)
 chat_model = ChatOpenAI(model_name="gpt-4o-mini", temperature=0, openai_api_key=OPEN_API_KEY)
 
-def get_Chat_response(text):    
+def get_Chat_response(text):
     if db_vectors:
-        chunks_query_retriever = db_vectors.as_retriever(search_kwargs={"k": 5})
+        chunks_query_retriever = db_vectors.as_retriever(
+            search_kwargs={"k": 5, "score_threshold": 0.7}
+        )
+        print(chunks_query_retriever)
         semantic_rag_chain = (
             {"context": chunks_query_retriever, "question": RunnablePassthrough()}
             | rag_prompt
