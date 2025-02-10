@@ -1,6 +1,7 @@
 import fitz
 from langchain_experimental.text_splitter import SemanticChunker
-from sklearn.metrics.pairwise import cosine_similarity
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
 
 def read_pdf_to_string(filepath):
     doc = fitz.open(filepath)
@@ -19,8 +20,14 @@ def chunking(text, embeddings):
     )
     return text_splitter.create_documents([text])
 
-def calcucate_cosine_distance(vector1, vector2):
-    similarity = cosine_similarity(vector1, vector2)
-    distance = 1 - similarity
-    return distance
-
+def encode_pdf(path):
+    text = read_pdf_to_string(path)
+    text_splitter = SemanticChunker(
+        OpenAIEmbeddings(),
+        breakpoint_threshold_type="percentile",
+        breakpoint_threshold_amount=90,
+        min_chunk_size=100
+    )
+    docs = text_splitter.create_documents([text])
+    vector_store = FAISS.from_documents(docs, OpenAIEmbeddings())
+    return vector_store    

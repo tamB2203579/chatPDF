@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from flask import Flask, render_template, request 
 from werkzeug.utils import secure_filename
 from langchain_community.vectorstores import FAISS
@@ -8,8 +9,8 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from helper_functions import *
 
-OPEN_API_KEY = os.getenv("OPEN_API_KEY")
-embeddings = OpenAIEmbeddings(api_key=OPEN_API_KEY)
+load_dotenv()
+os.environ["OPENAI_API_KEY"] = os.getenv('API_KEY')
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = "uploads"
@@ -28,8 +29,6 @@ def chat():
 
 @app.route("/upload", methods=["POST"])
 def upload_pdf():
-    global db_vectors
-
     if "file" not in request.files:
         return "No file uploaded", 400
     
@@ -39,11 +38,10 @@ def upload_pdf():
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(filepath)
 
-    content = read_pdf_to_string(filepath)
-    docs = chunking(content, embeddings)
-    db_vectors = FAISS.from_documents(docs, embeddings)
+    global db_vectors
+    db_vectors = encode_pdf(filepath)
 
-    return "File uploaded and processed successfully"
+    return "File uploaded successfully"
 
 rag_template = """\
 Use only the following context to answer the user's query in a well-formatted, concise, and clear manner paragraph. If you don't have an answer, respond "Tài liệu pdf mà bạn cung cấp không có thông tin cho câu hỏi của bạn!".
@@ -56,23 +54,17 @@ Trả lời:
 """
 
 rag_prompt = ChatPromptTemplate.from_template(rag_template)
-chat_model = ChatOpenAI(model_name="gpt-4o-mini", temperature=0.9, openai_api_key=OPEN_API_KEY)
+chat_model = ChatOpenAI(model_name="gpt-4o-mini", temperature=0)
 
 def get_Chat_response(text):
-    if db_vectors:
-        chunks_query_retriever = db_vectors.as_retriever(
-            search_kwargs={"k": 5, "score_threshold": 0.7}
-        )
-        semantic_rag_chain = (
-            {"context": chunks_query_retriever, "question": RunnablePassthrough()}
-            | rag_prompt
-            | chat_model
-            | StrOutputParser()
-        )
-        return semantic_rag_chain.invoke(text)
-    else:
-        return chat_model.invoke(text).content
-
+    chunks_query_retriever = db_vectors.as_retriever(search_kwargs={"k": 3, "score_threshold": 0.5})
+    semantic_rag_chain = (
+        {"context": chunks_query_retriever, "question": RunnablePassthrough()}
+        | rag_prompt
+        | chat_model
+        | StrOutputParser()
+    )
+    return semantic_rag_chain.invoke(text)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True) 
