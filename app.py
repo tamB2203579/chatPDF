@@ -2,8 +2,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, render_template, request 
 from werkzeug.utils import secure_filename
-from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
@@ -58,6 +57,10 @@ chat_model = ChatOpenAI(model_name="gpt-4o-mini", temperature=0)
 
 def get_Chat_response(text):
     chunks_query_retriever = db_vectors.as_retriever(search_kwargs={"k": 3, "score_threshold": 0.5})
+    
+    docs = db_vectors.similarity_search_with_score(text, k=3)
+    save_csv(text, docs)
+
     semantic_rag_chain = (
         {"context": chunks_query_retriever, "question": RunnablePassthrough()}
         | rag_prompt
