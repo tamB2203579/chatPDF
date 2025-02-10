@@ -24,14 +24,15 @@ def chunking(text, embeddings):
 
 def encode_pdf(path):
     text = read_pdf_to_string(path)
+    embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
     text_splitter = SemanticChunker(
-        OpenAIEmbeddings(),
+        embeddings,
         breakpoint_threshold_type="percentile",
         breakpoint_threshold_amount=90,
         min_chunk_size=100
     )
     docs = text_splitter.create_documents([text])
-    vector_store = FAISS.from_documents(docs, OpenAIEmbeddings())
+    vector_store = FAISS.from_documents(docs, embeddings)
     return vector_store
 
 def save_csv(query, docs, path="training.csv"):
@@ -42,7 +43,7 @@ def save_csv(query, docs, path="training.csv"):
             "answer": doc.page_content,
             "score": score
         })
-    df = pd.DataFrame(data)
+    df = pd.DataFrame(data) 
     if os.path.exists(path):
         df.to_csv(path, mode='a', header=False, index=False, encoding='utf-8')
     else:
